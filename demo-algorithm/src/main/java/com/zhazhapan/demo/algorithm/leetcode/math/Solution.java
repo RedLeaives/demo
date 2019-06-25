@@ -3,10 +3,7 @@ package com.zhazhapan.demo.algorithm.leetcode.math;
 import com.zhazhapan.demo.algorithm.common.annotation.LeetCode;
 import com.zhazhapan.demo.algorithm.common.enums.Difficulty;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author pantao
@@ -24,6 +21,117 @@ public class Solution {
         romanMap.put('C', 100);
         romanMap.put('D', 500);
         romanMap.put('M', 1000);
+    }
+
+    @LeetCode(id = 447, title = "回旋镖的数量", difficulty = Difficulty.EASY)
+    public int numberOfBoomerangs(int[][] points) {
+        int len = points.length;
+        int ans = 0;
+        Map<Integer, Integer> map = new HashMap<>(len, 1);
+        for (int i = 0; i < len; i++) {
+            int[] a = points[i];
+            for (int j = 0; j < len; j++) {
+                if (i == j) {
+                    continue;
+                }
+                int[] b = points[j];
+                int x = Math.abs(a[0] - b[0]);
+                int y = Math.abs(a[1] - b[1]);
+                int distance = x * x + y * y;
+                int n = map.getOrDefault(distance, 0);
+                if (n > 0) {
+                    ans += 2 * n;
+                }
+                map.put(distance, n + 1);
+            }
+            map.clear();
+        }
+        return ans;
+    }
+
+    private Integer distanceHelper(Map<Integer, Integer> map, int[] a, int[] b, int i, int j) {
+        if (i < j) {
+            i *= 1000;
+        } else {
+            j *= 1000;
+        }
+        Integer key = i + j;
+        Integer dis = map.get(key);
+        if (dis == null) {
+            int x = Math.abs(a[0] - b[0]);
+            int y = Math.abs(a[1] - b[1]);
+            dis = x * x + y * y;
+            map.put(key, dis);
+        }
+        return dis;
+    }
+
+    @LeetCode(id = 15, title = "三数之和", difficulty = Difficulty.MEDIUM)
+    public List<List<Integer>> threeSum(int[] nums) {
+        Arrays.sort(nums);
+        List<List<Integer>> lists = new ArrayList<>(nums.length / 3);
+        List<Integer> list;
+        Map<Integer, Integer> targetMap = new HashMap(nums.length, 1);
+        Set<String> has = new HashSet<>(nums.length / 3);
+        for (int i = 0; i < nums.length; i++) {
+            Integer target = -nums[i];
+            if (!targetMap.containsKey(target)) {
+                targetMap.put(target, i);
+            }
+        }
+        for (int target : targetMap.keySet()) {
+            int targetIdx = targetMap.get(target);
+            int start = 0;
+            int end = nums.length - 1;
+            while (start < end) {
+                if (start == targetIdx) {
+                    start++;
+                    continue;
+                }
+                if (end == targetIdx) {
+                    end--;
+                    continue;
+                }
+                int res = nums[start] + nums[end];
+                if (res == target) {
+                    StringBuilder builder = new StringBuilder().append(nums[start]);
+                    int pos = -target;
+                    if (pos < nums[start]) {
+                        builder.insert(0, pos);
+                        builder.append(nums[end]);
+                    } else if (pos > nums[end]) {
+                        builder.append(nums[end]).append(pos);
+                    } else {
+                        builder.append(pos).append(nums[end]);
+                    }
+                    String str = builder.toString();
+                    if (!has.contains(str)) {
+                        list = new ArrayList<>(3);
+                        list.add(-target);
+                        list.add(nums[start]);
+                        list.add(nums[end]);
+                        lists.add(list);
+                        has.add(str);
+                    }
+                    // 跳过重复
+                    int left = start + 1;
+                    int right = end - 1;
+                    while (nums[start] == nums[left] && left < right) {
+                        left++;
+                    }
+                    while (nums[end] == nums[right] && right > left) {
+                        right--;
+                    }
+                    start = left;
+                    end = right;
+                } else if (res > target) {
+                    end--;
+                } else {
+                    start++;
+                }
+            }
+        }
+        return lists;
     }
 
     @LeetCode(id = 9, title = "回文数", difficulty = Difficulty.EASY)

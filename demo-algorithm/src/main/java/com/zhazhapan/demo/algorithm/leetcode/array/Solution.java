@@ -11,6 +11,60 @@ import java.util.*;
  */
 public class Solution {
 
+    @LeetCode(id = 11, title = "盛最多水的容器", difficulty = Difficulty.MEDIUM)
+    public int maxArea(int[] height) {
+        int i = 0;
+        int j = height.length - 1;
+        int max = 0;
+        while (i < j) {
+            int heigh = height[i];
+            if (heigh < height[j]) {
+                i++;
+            } else {
+                heigh = height[j--];
+            }
+            max = Math.max(max, heigh * (j - i + 1));
+        }
+        return max;
+    }
+
+    @LeetCode(id = 75, title = "颜色分类", difficulty = Difficulty.MEDIUM)
+    public void sortColors(int[] nums) {
+        int[] cnts = new int[3];
+        for (int num : nums) {
+            cnts[num]++;
+        }
+        int start = 0;
+        for (int i = 0; i < cnts.length; i++) {
+            Arrays.fill(nums, start, start + cnts[i], i);
+            start += cnts[i];
+        }
+    }
+
+    @LeetCode(id = 80, title = "删除排序数组中的重复项 II", difficulty = Difficulty.MEDIUM)
+    public int removeDuplicates2(int[] nums) {
+        if (nums.length < 3) {
+            return nums.length;
+        }
+        int len = 1;
+        int val = nums[0];
+        int cnt = 0;
+        for (int i = 1; i < nums.length; i++) {
+            int num = nums[i];
+            if (num == val) {
+                if (cnt == 0) {
+                    nums[len++] = num;
+                }
+                cnt++;
+            } else {
+                val = num;
+                nums[len++] = num;
+                cnt = 0;
+            }
+        }
+        return len;
+    }
+
     @LeetCode(id = 210, title = "课程表 II", difficulty = Difficulty.MEDIUM, selfResolved = false)
     public int[] findOrder(int numCourses, int[][] prerequisites) {
         int[] indegree = new int[numCourses];

@@ -2,6 +2,7 @@ package com.zhazhapan.demo.algorithm.leetcode.chain;
 
 import com.zhazhapan.demo.algorithm.common.annotation.LeetCode;
 import com.zhazhapan.demo.algorithm.common.enums.Difficulty;
+import com.zhazhapan.demo.algorithm.leetcode.model.TreeNode;
 
 import java.util.*;
 
@@ -10,6 +11,45 @@ import java.util.*;
  * @since 2019/2/15
  **/
 public class Solution {
+
+    private int tilt = 0;
+
+    @LeetCode(id = 23, title = "合并K个排序链表", difficulty = Difficulty.HARD)
+    public ListNode mergeKLists(ListNode[] lists) {
+        Queue<ListNode> nodes = new PriorityQueue<>(Comparator.comparingInt(n -> n.val));
+        for (ListNode node : lists) {
+            if (node != null) {
+                nodes.offer(node);
+            }
+        }
+        ListNode root = new ListNode(0);
+        ListNode next = root;
+        while (!nodes.isEmpty()) {
+            ListNode node = nodes.poll();
+            next.next = new ListNode(node.val);
+            next = next.next;
+            if (node.next != null) {
+                nodes.offer(node.next);
+            }
+        }
+        return root.next;
+    }
+
+    @LeetCode(id = 563, title = "二叉树的坡度", difficulty = Difficulty.EASY)
+    public int findTilt(TreeNode root) {
+        traverse(root);
+        return tilt;
+    }
+
+    public int traverse(TreeNode root) {
+        if (root == null) {
+            return 0;
+        }
+        int left = traverse(root.left);
+        int right = traverse(root.right);
+        tilt += Math.abs(left - right);
+        return left + right + root.val;
+    }
 
     @LeetCode(id = 24, title = "两两交换链表中的节点", difficulty = Difficulty.MEDIUM)
     public ListNode swapPairs(ListNode head) {

@@ -19,6 +19,158 @@ public class Solution {
 
     private final char nine = '9';
 
+    private Set<Character> vowels = new HashSet<>(Arrays.asList('a', 'A', 'e', 'E', 'i', 'I', 'o', 'O', 'u', 'U'));
+
+    @LeetCode(id = 165, title = "比较版本号", difficulty = Difficulty.MEDIUM)
+    public int compareVersion(String version1, String version2) {
+        String[] vers1 = version1.split("\\.");
+        String[] vers2 = version2.split("\\.");
+        int len = Math.max(vers1.length, vers2.length);
+        for (int i = 0; i < len; i++) {
+            int ver1 = i < vers1.length ? Integer.valueOf(vers1[i]) : 0;
+            int ver2 = i < vers2.length ? Integer.valueOf(vers2[i]) : 0;
+            if (ver1 > ver2) {
+                return 1;
+            }
+            if (ver1 < ver2) {
+                return -1;
+            }
+        }
+        return 0;
+    }
+
+    @LeetCode(id = 97, title = "交错字符串", difficulty = Difficulty.HARD, selfResolved = false)
+    public boolean isInterleave(String s1, String s2, String s3) {
+        if (s3.length() != s1.length() + s2.length()) {
+            return false;
+        }
+        boolean dp[][] = new boolean[s1.length() + 1][s2.length() + 1];
+        for (int i = 0; i <= s1.length(); i++) {
+            for (int j = 0; j <= s2.length(); j++) {
+                if (i == 0 && j == 0) {
+                    dp[i][j] = true;
+                } else if (i == 0) {
+                    dp[i][j] = dp[i][j - 1] && s2.charAt(j - 1) == s3.charAt(i + j - 1);
+                } else if (j == 0) {
+                    dp[i][j] = dp[i - 1][j] && s1.charAt(i - 1) == s3.charAt(i + j - 1);
+                } else {
+                    boolean left = dp[i - 1][j] && s1.charAt(i - 1) == s3.charAt(i + j - 1);
+                    boolean right = dp[i][j - 1] && s2.charAt(j - 1) == s3.charAt(i + j - 1);
+                    dp[i][j] = left || right;
+                }
+            }
+        }
+        return dp[s1.length()][s2.length()];
+    }
+
+    @LeetCode(id = 68, title = "文本左右对齐", difficulty = Difficulty.HARD, selfResolved = false)
+    public List<String> fullJustify(String[] words, int maxWidth) {
+        List<String> ans = new ArrayList<>();
+        int currentLen = 0;
+        int start = 0;
+        int end = 0;
+        for (int i = 0; i < words.length; ) {
+            if (currentLen == 0 && currentLen + words[i].length() <= maxWidth || currentLen > 0 && currentLen + 1 + words[i].length() <= maxWidth) {
+                end++;
+                if (currentLen == 0) {
+                    currentLen = currentLen + words[i].length();
+                } else {
+                    currentLen = currentLen + 1 + words[i].length();
+                }
+                i++;
+            } else {
+                int sub = maxWidth - currentLen + (end - start) - 1;
+                if (end - start == 1) {
+                    String blank = getStringBlank(sub);
+                    ans.add(words[start] + blank);
+                } else {
+                    StringBuilder temp = new StringBuilder();
+                    temp.append(words[start]);
+                    int averageBlank = sub / ((end - start) - 1);
+                    //如果除不尽，计算剩余空格数
+                    int missing = sub - averageBlank * ((end - start) - 1);
+                    String blank = getStringBlank(averageBlank + 1);
+                    int k = 1;
+                    for (int j = 0; j < missing; j++) {
+                        temp.append(blank + words[start + k]);
+                        k++;
+                    }
+                    blank = getStringBlank(averageBlank);
+                    for (; k < (end - start); k++) {
+                        temp.append(blank + words[start + k]);
+                    }
+                    ans.add(temp.toString());
+
+                }
+                start = end;
+                currentLen = 0;
+
+            }
+        }
+        StringBuilder temp = new StringBuilder();
+        temp.append(words[start]);
+        for (int i = 1; i < (end - start); i++) {
+            temp.append(" " + words[start + i]);
+        }
+        temp.append(getStringBlank(maxWidth - currentLen));
+        ans.add(temp.toString());
+        return ans;
+    }
+
+    private String getStringBlank(int n) {
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            str.append(" ");
+        }
+        return str.toString();
+    }
+
+    @LeetCode(id = 345, title = "反转字符串中的元音字母", difficulty = Difficulty.MEDIUM)
+    public String reverseVowels(String s) {
+        char[] origin = s.toCharArray();
+        int i = 0;
+        int j = origin.length - 1;
+        while (i < j) {
+            char c1 = origin[i];
+            if (vowels.contains(c1)) {
+                char c2 = origin[j];
+                while (!vowels.contains(c2)) {
+                    origin[j--] = c2;
+                    c2 = origin[j];
+                }
+                origin[i++] = c2;
+                origin[j--] = c1;
+            } else {
+                origin[i++] = c1;
+            }
+        }
+        return new String(origin);
+    }
+
+    @LeetCode(id = 451, title = "根据字符出现频率排序", difficulty = Difficulty.MEDIUM)
+    public String frequencySort(String s) {
+        int len = s.length();
+        char[] cs = s.toCharArray();
+        List<Character> unique = new ArrayList<>();
+        Map<Character, Integer> cnt = new HashMap<>(128);
+        for (int i = 0; i < len; i++) {
+            char c = cs[i];
+            int count = cnt.getOrDefault(c, 0);
+            if (count == 0) {
+                unique.add(c);
+            }
+            cnt.put(c, count + 1);
+        }
+        unique.sort((c1, c2) -> cnt.get(c2).compareTo(cnt.get(c1)));
+        for (int i = 0, j = 0; i < len; j++) {
+            char c = unique.get(j);
+            for (int size = cnt.get(c); size > 0; size--, i++) {
+                cs[i] = c;
+            }
+        }
+        return new String(cs);
+    }
+
     @LeetCode(id = 127, title = "单词接龙", difficulty = Difficulty.MEDIUM, selfResolved = false)
     public int ladderLength(String beginWord, String endWord, List<String> wordList) {
         int ans = 0;
